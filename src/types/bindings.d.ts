@@ -1,4 +1,6 @@
-export interface Env {
+import type { Environment } from 'hono'
+
+interface Bindings {
   AI: {
     run<T = any>(model: string, options: { prompt: string; stream?: boolean }): Promise<T>
   }
@@ -8,3 +10,5 @@ export interface Env {
     upsert(vectors: { id: string; values: number[]; metadata?: Record<string, any> }[]): Promise<void>
   }
 }
+
+export type Env = Environment & Bindings

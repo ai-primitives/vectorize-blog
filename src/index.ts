@@ -1,33 +1,35 @@
 /** @jsx jsx */
-/** @jsxFrag Fragment */
-import { jsx, Fragment } from 'hono/jsx'
 import { Hono } from 'hono'
-import { jsxRenderer } from 'hono/jsx'
+import { jsx } from 'hono/jsx'
+import { renderToReadableStream, Suspense } from 'hono/jsx/streaming'
 import type { Env } from './types/bindings'
-import { RootLayout } from './layouts/RootLayout'
-import { Loading } from './components/Loading'
 
-const app = new Hono<{ Bindings: Env }>()
+const app = new Hono<Env>()
 
-// Configure JSX renderer
-app.use('*', jsxRenderer({
-  docType: true
-}))
+const Component = async () => {
+  return <div>Hello World</div>
+}
 
 // Health check endpoint
 app.get('/health', (c) => c.text('OK'))
 
 // Root endpoint
 app.get('/', (c) => {
-  return c.render(
-    <div class='prose lg:prose-xl mx-auto'>
-      <h1>AI-Powered Blog</h1>
-      <div class='py-4'>
-        <Loading />
-        <div>Content loading...</div>
-      </div>
-    </div>
+  const stream = renderToReadableStream(
+    <html>
+      <body>
+        <Suspense fallback={<div>loading...</div>}>
+          <Component />
+        </Suspense>
+      </body>
+    </html>
   )
+  return c.body(stream, {
+    headers: {
+      'Content-Type': 'text/html; charset=UTF-8',
+      'Transfer-Encoding': 'chunked',
+    },
+  })
 })
 
 export default app

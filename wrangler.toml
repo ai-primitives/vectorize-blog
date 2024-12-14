@@ -4,5 +4,14 @@ compatibility_date = "2024-01-01"
 [ai]
 binding = "AI"
 
+# Configure AI models
+[[ai.models]]
+name = "bge-small-en-v1.5"
+type = "embeddings"
+
+[[ai.models]]
+name = "@cf/llama-3.3-70b-instruct-fp8-fast"
+type = "llm"
+
 [vectorize]
 binding = "BLOG_INDEX"

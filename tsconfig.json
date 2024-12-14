@@ -1,19 +1,18 @@
 {
   "compilerOptions": {
-    "jsx": "preserve",
-    "jsxImportSource": "hono/jsx",
-    "target": "esnext",
-    "module": "esnext",
-    "moduleResolution": "node",
-    "types": ["@cloudflare/workers-types"],
-    "strict": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "esModuleInterop": true,
+    "strict": true,
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["@cloudflare/workers-types"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
-    "paths": {
-      "hono/jsx/jsx-runtime": ["./node_modules/hono/jsx/jsx-runtime"]
-    }
+    "isolatedModules": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
