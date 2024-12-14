@@ -1,4 +1,7 @@
-import { FC } from 'hono/jsx'
+/** @jsx jsx */
+/** @jsxFrag Fragment */
+import { jsx, Fragment } from 'hono/jsx'
+import type { FC } from 'hono/jsx'
 
 export const Loading: FC = () => (
   <div class='flex items-center justify-center p-8'>

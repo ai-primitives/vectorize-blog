@@ -1,15 +1,19 @@
 {
   "compilerOptions": {
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "jsxImportSource": "hono/jsx",
     "target": "esnext",
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "types": ["@cloudflare/workers-types"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "paths": {
+      "hono/jsx/jsx-runtime": ["./node_modules/hono/jsx/jsx-runtime"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
