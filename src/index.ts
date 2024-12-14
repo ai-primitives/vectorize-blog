@@ -13,6 +13,37 @@ const Component = async () => {
 // Health check endpoint
 app.get('/health', (c) => c.text('OK'))
 
+// Robots.txt endpoint
+app.get('/robots.txt', (c) => {
+  const robotsTxt = `
+User-agent: *
+Allow: /
+Sitemap: ${new URL('/sitemap.xml', c.req.url).href}
+`.trim()
+  return c.text(robotsTxt, {
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+  })
+})
+
+// Sitemap.xml endpoint
+app.get('/sitemap.xml', async (c) => {
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${new URL('/', c.req.url).href}</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>`
+  return c.text(sitemap, {
+    headers: {
+      'Content-Type': 'application/xml',
+    },
+  })
+})
+
 // Root endpoint
 app.get('/', (c) => {
   const stream = renderToReadableStream(
