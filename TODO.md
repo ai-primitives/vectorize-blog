@@ -9,15 +9,15 @@
   - [x] Add typography plugin to tailwind.config.js
 
 ## Content Generation Pipeline
-- [ ] Implement blog post title generation
-  - [ ] Create Cloudflare Worker for title generation using llama model
-  - [ ] Set up workflow trigger from robots.txt access
+- [x] Implement blog post title generation
+  - [x] Create Cloudflare Worker for title generation using llama model
+  - [x] Set up workflow trigger from robots.txt access
 - [x] Implement vector embedding generation
   - [x] Use bge-small-en-v1.5 model for embeddings
   - [x] Store embeddings in Vectorize index
-- [ ] Implement blog post content generation
-  - [ ] Create content generation worker using llama model
-  - [ ] Store content with metadata in Vectorize
+- [x] Implement blog post content generation
+  - [x] Create content generation worker using llama model
+  - [x] Store content with metadata in Vectorize
 
 ## Frontend Implementation
 - [ ] Create blog post grid view
@@ -44,9 +44,9 @@
   - [x] Test embedding generation
   - [x] Test content storage and retrieval
   - [x] Test related posts search
-- [ ] Add tests for content generation
-  - [ ] Test title generation workflow
-  - [ ] Test blog post generation
+- [x] Add tests for content generation
+  - [x] Test title generation workflow
+  - [x] Test blog post generation
 - [x] Add tests for frontend components
   - [x] Test loading states
   - [x] Test error boundaries
