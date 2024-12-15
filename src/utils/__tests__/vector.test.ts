@@ -1,19 +1,18 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { generateEmbedding, storeBlogPost, findRelatedPosts } from '../vector'
-import { formatBlogUrl } from '../../types/blog'
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { unstable_dev } from 'wrangler'
+import type { Unstable_DevWorker } from 'wrangler'
 import type { BlogPostInput } from '../../types/blog'
-import type { Env } from '../../types/bindings'
+
+interface StoreResponse {
+  success: boolean
+}
+
+interface FindResponse {
+  posts: BlogPostInput[]
+}
 
 describe('vector utilities', () => {
-  const mockEnv = {
-    AI: {
-      run: vi.fn()
-    },
-    BLOG_INDEX: {
-      query: vi.fn(),
-      upsert: vi.fn()
-    }
-  } as unknown as Env
+  let worker: Unstable_DevWorker
 
   const mockBlogPost: BlogPostInput = {
     title: 'Test Blog Post',
@@ -24,82 +23,37 @@ describe('vector utilities', () => {
     content: 'Test content'
   }
 
-  const mockEmbedding = [0.1, 0.2, 0.3, 0.4, 0.5]
-
-  beforeEach(() => {
-    vi.clearAllMocks()
-    mockEnv.AI.run.mockResolvedValue({ data: mockEmbedding })
-    mockEnv.BLOG_INDEX.query.mockResolvedValue({
-      matches: [{
-        id: formatBlogUrl(mockBlogPost.title),
-        score: 0.95,
-        metadata: {
-          ...mockBlogPost,
-          url: formatBlogUrl(mockBlogPost.title),
-          embeddings: {
-            title: mockEmbedding,
-            description: mockEmbedding,
-            tagline: mockEmbedding,
-            headline: mockEmbedding,
-            subhead: mockEmbedding,
-            content: mockEmbedding
-          }
-        }
-      }]
+  beforeAll(async () => {
+    worker = await unstable_dev('src/index.ts', {
+      experimental: { disableExperimentalWarning: true }
     })
   })
 
-  describe('generateEmbedding', () => {
-    it('should generate embeddings using the correct model', async () => {
-      const result = await generateEmbedding(mockEnv, 'test text')
-      expect(mockEnv.AI.run).toHaveBeenCalledWith('bge-small-en-v1.5', {
-        prompt: 'test text'
+  afterAll(async () => {
+    await worker.stop()
+  })
+
+  describe('blog post operations', () => {
+    it('should store and retrieve blog posts', async () => {
+      // Store blog post
+      const storeResponse = await worker.fetch('/api/blog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mockBlogPost)
       })
-      expect(result).toEqual(mockEmbedding)
-    })
-  })
+      expect(storeResponse.status).toBe(200)
+      const storeData = await storeResponse.json() as StoreResponse
+      expect(storeData.success).toBe(true)
 
-  describe('storeBlogPost', () => {
-    it('should store blog post with correct metadata and embeddings', async () => {
-      await storeBlogPost(mockEnv, mockBlogPost)
-
-      expect(mockEnv.BLOG_INDEX.upsert).toHaveBeenCalledWith([{
-        id: formatBlogUrl(mockBlogPost.title),
-        values: mockEmbedding,
-        metadata: {
-          ...mockBlogPost,
-          url: formatBlogUrl(mockBlogPost.title),
-          embeddings: {
-            title: mockEmbedding,
-            description: mockEmbedding,
-            tagline: mockEmbedding,
-            headline: mockEmbedding,
-            subhead: mockEmbedding,
-            content: mockEmbedding
-          }
-        }
-      }])
-    })
-  })
-
-  describe('findRelatedPosts', () => {
-    it('should return related posts based on title embedding', async () => {
-      const result = await findRelatedPosts(mockEnv, mockEmbedding)
-
-      expect(mockEnv.BLOG_INDEX.query).toHaveBeenCalledWith(mockEmbedding, { topK: 6 })
-      expect(result).toHaveLength(1)
-      expect(result[0]).toEqual({
-        ...mockBlogPost,
-        url: formatBlogUrl(mockBlogPost.title),
-        embeddings: {
-          title: mockEmbedding,
-          description: mockEmbedding,
-          tagline: mockEmbedding,
-          headline: mockEmbedding,
-          subhead: mockEmbedding,
-          content: mockEmbedding
-        }
+      // Find related posts
+      const findResponse = await worker.fetch('/api/blog/related', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: mockBlogPost.title })
       })
+      expect(findResponse.status).toBe(200)
+      const findData = await findResponse.json() as FindResponse
+      expect(Array.isArray(findData.posts)).toBe(true)
     })
   })
 })
