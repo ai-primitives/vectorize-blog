@@ -20,8 +20,8 @@
   - [x] Store content with metadata in Vectorize
 
 ## Frontend Implementation
-- [ ] Create blog post grid view
-  - [ ] Implement grid layout with Tailwind CSS
+- [x] Create blog post grid view
+  - [x] Implement grid layout with Tailwind CSS
   - [x] Add skeleton loading states
 - [x] Create blog post detail view
   - [x] Implement URL routing with title case and underscores
