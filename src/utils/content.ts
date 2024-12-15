@@ -51,13 +51,16 @@ Style: Professional but conversational, with clear explanations and practical ex
 export async function generateBlogPostTitle(env: Env): Promise<string> {
   try {
     const ai = new Ai(env.AI)
-    const response = await ai.run('@cf/meta/llama-2-7b-chat-int8', {
+    const result = await ai.run('@cf/meta/llama-2-7b-chat-int8', {
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: titlePrompt }
       ]
-    }) as { response: string }
-    return response.response.trim()
+    })
+    if (typeof result !== 'object' || !result || !('response' in result) || typeof result.response !== 'string') {
+      throw new Error('Invalid AI response format')
+    }
+    return result.response.trim()
   } catch (error) {
     const aiError = error as AIError
     throw new ContentGenerationError(`Failed to generate blog post title: ${aiError.message}`, 'title', aiError.cause)
@@ -67,15 +70,23 @@ export async function generateBlogPostTitle(env: Env): Promise<string> {
 export async function generateMetaContent(env: Env, title: string): Promise<GeneratedContent> {
   try {
     const ai = new Ai(env.AI)
-    const response = await ai.run('@cf/meta/llama-2-7b-chat-int8', {
+    const result = await ai.run('@cf/meta/llama-2-7b-chat-int8', {
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: metaPrompt(title) }
       ]
-    }) as { response: string }
-    return {
-      title,
-      ...JSON.parse(response.response)
+    })
+    if (typeof result !== 'object' || !result || !('response' in result) || typeof result.response !== 'string') {
+      throw new Error('Invalid AI response format')
+    }
+    try {
+      const metaContent = JSON.parse(result.response) as Omit<GeneratedContent, 'title'>
+      return {
+        title,
+        ...metaContent
+      }
+    } catch (parseError) {
+      throw new Error(`Invalid JSON in AI response: ${(parseError as Error).message}`)
     }
   } catch (error) {
     const aiError = error as AIError
@@ -86,13 +97,16 @@ export async function generateMetaContent(env: Env, title: string): Promise<Gene
 export async function generateContent(env: Env, title: string, metadata: GeneratedContent): Promise<string> {
   try {
     const ai = new Ai(env.AI)
-    const response = await ai.run('@cf/meta/llama-2-7b-chat-int8', {
+    const result = await ai.run('@cf/meta/llama-2-7b-chat-int8', {
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: contentPrompt(title, metadata) }
       ]
-    }) as { response: string }
-    return response.response.trim()
+    })
+    if (typeof result !== 'object' || !result || !('response' in result) || typeof result.response !== 'string') {
+      throw new Error('Invalid AI response format')
+    }
+    return result.response.trim()
   } catch (error) {
     const aiError = error as AIError
     throw new ContentGenerationError(`Failed to generate content: ${aiError.message}`, 'content', aiError.cause)
@@ -103,8 +117,10 @@ export async function generateAndStoreBlogPost(env: Env): Promise<void> {
   try {
     const title = await generateBlogPostTitle(env)
     const metaContent = await generateMetaContent(env, title)
-    const embedding = await generateEmbedding(env, title)
-    const content = await generateContent(env, title, metaContent)
+    const [embedding, content] = await Promise.all([
+      generateEmbedding(env, title),
+      generateContent(env, title, metaContent)
+    ])
 
     const blogPost: BlogPostInput = {
       title,
