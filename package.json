@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "dev": "wrangler dev",
+    "dev": "wrangler dev src/index.tsx --experimental-vectorize-bind-to-prod",
     "deploy": "wrangler deploy",
-    "build": "wrangler build"
+    "build": "wrangler deploy --dry-run --outdir=dist"
   },
   "keywords": [
     "blog",
@@ -38,7 +38,6 @@
     "semantic-release": "^24.2.0",
     "tailwindcss": "^3.4.16",
     "typescript": "^5.7.2",
-    "vite": "^6.0.3",
     "vitest": "^2.1.8",
     "vitest-environment-miniflare": "^2.14.4",
     "wrangler": "^3.95.0"
