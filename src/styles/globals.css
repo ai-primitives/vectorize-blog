@@ -76,3 +76,23 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .blog-card {
+    @apply group block p-6 bg-white rounded-lg border hover:shadow-lg transition-shadow
+           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  }
+
+  .blog-card-title {
+    @apply text-xl font-semibold mb-2 group-hover:text-blue-600
+           group-focus:text-blue-600;
+  }
+
+  .blog-card-description {
+    @apply text-gray-600 mb-4 line-clamp-3;
+  }
+
+  .blog-card-meta {
+    @apply text-sm text-gray-500;
+  }
+}
