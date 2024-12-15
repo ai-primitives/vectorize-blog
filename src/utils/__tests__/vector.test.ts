@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { generateEmbedding, storeBlogPost, findRelatedPosts } from '../vector'
 import type { BlogPostInput } from '../../types/blog'
+import type { Env } from '../../types/bindings'
+
+declare global {
+  var getMiniflareBindings: () => Env
+}
 
 describe('vector utilities', () => {
   const mockBlogPost: BlogPostInput = {
