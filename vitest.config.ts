@@ -8,25 +8,13 @@ export default defineWorkersConfig({
           configPath: './wrangler.toml',
           modules: true,
           env: 'test',
-          vars: {
-            ENVIRONMENT: 'test'
-          },
           bindings: {
             AI: {
-              run: async (model: string, { prompt }: { prompt: string }) => {
-                if (model === 'bge-small-en-v1.5') {
-                  return { data: [0.1, 0.2, 0.3, 0.4, 0.5] }
-                }
-                return { response: 'Test response' }
-              }
+              run: async () => ({ data: [0.1, 0.2, 0.3, 0.4, 0.5] })
             },
             BLOG_INDEX: {
-              query: async (vector: number[], options: { topK: number }) => {
-                return { matches: [] }
-              },
-              upsert: async (vectors: Array<{ id: string, values: number[], metadata: any }>) => {
-                return { success: true }
-              }
+              query: async () => ({ matches: [] }),
+              upsert: async () => ({ success: true })
             }
           }
         }

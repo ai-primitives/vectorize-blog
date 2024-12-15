@@ -25,7 +25,13 @@ describe('vector utilities', () => {
 
   beforeAll(async () => {
     worker = await unstable_dev('src/index.ts', {
-      experimental: { disableExperimentalWarning: true }
+      experimental: {
+        disableExperimentalWarning: true,
+        disableDevRegistry: true
+      },
+      env: 'test',
+      ip: '127.0.0.1',
+      local: true
     })
   })
 
