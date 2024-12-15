@@ -4,14 +4,18 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
-    "lib": ["ESNext"],
-    "types": ["@cloudflare/workers-types"],
+    "lib": ["ESNext", "DOM"],
+    "types": ["@cloudflare/workers-types", "@types/react", "@types/react-dom"],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
     "skipLibCheck": true,
     "isolatedModules": true,
     "allowJs": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"]
