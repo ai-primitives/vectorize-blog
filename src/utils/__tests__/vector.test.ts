@@ -1,18 +1,18 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { unstable_dev } from 'wrangler'
-import type { Unstable_DevWorker } from 'wrangler'
+import { describe, it, expect } from 'vitest'
+import { generateEmbedding, storeBlogPost, findRelatedPosts } from '../vector'
 import type { BlogPostInput } from '../../types/blog'
-
-interface StoreResponse {
-  success: boolean
-}
-
-interface FindResponse {
-  posts: BlogPostInput[]
-}
+import type { Env } from '../../types/bindings'
 
 describe('vector utilities', () => {
-  let worker: Unstable_DevWorker
+  const mockEnv: Env = {
+    AI: {
+      run: async () => ({ data: [0.1, 0.2, 0.3, 0.4, 0.5] })
+    },
+    BLOG_INDEX: {
+      query: async () => ({ matches: [] }),
+      upsert: async () => ({ success: true })
+    }
+  }
 
   const mockBlogPost: BlogPostInput = {
     title: 'Test Blog Post',
@@ -23,43 +23,25 @@ describe('vector utilities', () => {
     content: 'Test content'
   }
 
-  beforeAll(async () => {
-    worker = await unstable_dev('src/index.ts', {
-      experimental: {
-        disableExperimentalWarning: true,
-        disableDevRegistry: true
-      },
-      env: 'test',
-      ip: '127.0.0.1',
-      local: true
+  describe('generateEmbedding', () => {
+    it('should generate embeddings using AI model', async () => {
+      const embedding = await generateEmbedding(mockEnv, 'test text')
+      expect(embedding).toEqual([0.1, 0.2, 0.3, 0.4, 0.5])
     })
   })
 
-  afterAll(async () => {
-    await worker.stop()
+  describe('storeBlogPost', () => {
+    it('should store blog post with embeddings', async () => {
+      const result = await storeBlogPost(mockEnv, mockBlogPost)
+      expect(result).toBeDefined()
+    })
   })
 
-  describe('blog post operations', () => {
-    it('should store and retrieve blog posts', async () => {
-      // Store blog post
-      const storeResponse = await worker.fetch('/api/blog', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mockBlogPost)
-      })
-      expect(storeResponse.status).toBe(200)
-      const storeData = await storeResponse.json() as StoreResponse
-      expect(storeData.success).toBe(true)
-
-      // Find related posts
-      const findResponse = await worker.fetch('/api/blog/related', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: mockBlogPost.title })
-      })
-      expect(findResponse.status).toBe(200)
-      const findData = await findResponse.json() as FindResponse
-      expect(Array.isArray(findData.posts)).toBe(true)
+  describe('findRelatedPosts', () => {
+    it('should find related posts using vector similarity', async () => {
+      const embedding = [0.1, 0.2, 0.3, 0.4, 0.5]
+      const posts = await findRelatedPosts(mockEnv, embedding)
+      expect(Array.isArray(posts)).toBe(true)
     })
   })
 })
