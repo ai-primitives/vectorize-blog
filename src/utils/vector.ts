@@ -4,32 +4,27 @@ import type { VectorizeMatch } from '../types/bindings'
 import { formatBlogUrl } from '../types/blog'
 
 export async function generateEmbedding(env: Env, text: string): Promise<number[]> {
-  const result = await env.AI.run('bge-small-en-v1.5', {
-    prompt: text
-  }) as { data: number[] }
-  return result.data
+  const result = await env.AI.run('@cf/baai/bge-base-en-v1.5', {
+    text: [text]
+  }) as { data: number[][] }
+  return result.data[0]
 }
 
 export async function storeBlogPost(env: Env, input: BlogPostInput): Promise<void> {
-  const embeddings = {
-    title: await generateEmbedding(env, input.title),
-    description: await generateEmbedding(env, input.description),
-    tagline: await generateEmbedding(env, input.tagline),
-    headline: await generateEmbedding(env, input.headline),
-    subhead: await generateEmbedding(env, input.subhead),
-    content: await generateEmbedding(env, input.content)
-  }
-
   const url = formatBlogUrl(input.title)
   const metadata: BlogPostMeta = {
-    ...input,
-    url,
-    embeddings
+    title: input.title,
+    description: input.description,
+    tagline: input.tagline,
+    headline: input.headline,
+    subhead: input.subhead,
+    content: input.content,
+    url
   }
 
   await env.BLOG_INDEX.upsert([{
     id: url,
-    values: embeddings.title, // Use title embedding as primary vector
+    values: input.embedding,
     metadata
   }])
 }

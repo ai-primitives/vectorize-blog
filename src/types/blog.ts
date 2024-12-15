@@ -6,14 +6,6 @@ export interface BlogPostMeta {
   subhead: string
   content: string
   url: string
-  embeddings: {
-    title: number[]
-    description: number[]
-    tagline: number[]
-    headline: number[]
-    subhead: number[]
-    content: number[]
-  }
 }
 
 export interface BlogPostInput {
@@ -23,6 +15,15 @@ export interface BlogPostInput {
   headline: string
   subhead: string
   content: string
+  embedding: number[]
+}
+
+export interface GeneratedContent {
+  title: string
+  description: string
+  tagline: string
+  headline: string
+  subhead: string
 }
 
 export const formatBlogUrl = (title: string): string => {

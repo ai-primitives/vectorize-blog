@@ -1,5 +1,18 @@
 import type { Environment } from 'hono'
 
+type AIModel = '@cf/meta/llama-2-7b-chat-int8' | '@cf/baai/bge-base-en-v1.5'
+
+interface AiTextGenerationInput {
+  messages: Array<{
+    role: 'system' | 'user' | 'assistant'
+    content: string
+  }>
+}
+
+interface AiEmbeddingInput {
+  text: string[]
+}
+
 interface VectorizeMatch {
   id: string
   score: number
@@ -10,9 +23,17 @@ interface VectorizeQueryResult {
   matches: VectorizeMatch[]
 }
 
+interface AIResponse {
+  response: string
+}
+
+interface AIEmbeddingResponse {
+  data: number[][]
+}
+
 interface Bindings {
   AI: {
-    run<T = any>(model: string, options: { prompt: string; stream?: boolean }): Promise<T>
+    run(model: AIModel, input: AiTextGenerationInput | AiEmbeddingInput): Promise<AIResponse | AIEmbeddingResponse>
   }
   BLOG_INDEX: {
     query(vector: number[], options?: { topK?: number }): Promise<VectorizeQueryResult>
