@@ -4,37 +4,47 @@ import type { VectorizeMatch } from '../types/bindings'
 import { formatBlogUrl } from '../types/blog'
 
 export async function generateEmbedding(env: Env, text: string): Promise<number[]> {
-  const result = await env.AI.run('bge-small-en-v1.5', {
-    prompt: text
-  }) as { data: number[] }
-  return result.data
+  try {
+    const result = await env.AI.run('@cf/baai/bge-base-en-v1.5', {
+      text: [text]
+    }) as { data: number[][] }
+    return result.data[0]
+  } catch (error: any) {
+    const message = error?.message || 'Unknown error'
+    throw new Error(`AI model error: ${message}`)
+  }
 }
 
 export async function storeBlogPost(env: Env, input: BlogPostInput): Promise<void> {
-  const embeddings = {
-    title: await generateEmbedding(env, input.title),
-    description: await generateEmbedding(env, input.description),
-    tagline: await generateEmbedding(env, input.tagline),
-    headline: await generateEmbedding(env, input.headline),
-    subhead: await generateEmbedding(env, input.subhead),
-    content: await generateEmbedding(env, input.content)
-  }
+  try {
+    const url = formatBlogUrl(input.title)
+    const metadata: BlogPostMeta = {
+      title: input.title,
+      description: input.description,
+      tagline: input.tagline,
+      headline: input.headline,
+      subhead: input.subhead,
+      content: input.content,
+      url
+    }
 
-  const url = formatBlogUrl(input.title)
-  const metadata: BlogPostMeta = {
-    ...input,
-    url,
-    embeddings
+    await env.BLOG_INDEX.upsert([{
+      id: url,
+      values: input.embedding,
+      metadata
+    }])
+  } catch (error: any) {
+    const message = error?.message || 'Unknown error'
+    throw new Error(`Storage error: ${message}`)
   }
-
-  await env.BLOG_INDEX.upsert([{
-    id: url,
-    values: embeddings.title, // Use title embedding as primary vector
-    metadata
-  }])
 }
 
 export async function findRelatedPosts(env: Env, titleEmbedding: number[], limit: number = 6): Promise<BlogPostMeta[]> {
-  const results = await env.BLOG_INDEX.query(titleEmbedding, { topK: limit })
-  return results.matches.map((match: VectorizeMatch) => (match.metadata || {}) as unknown as BlogPostMeta)
+  try {
+    const results = await env.BLOG_INDEX.query(titleEmbedding, { topK: limit })
+    return results.matches.map((match: VectorizeMatch) => (match.metadata || {}) as unknown as BlogPostMeta)
+  } catch (error: any) {
+    const message = error?.message || 'Unknown error'
+    throw new Error(`Query error: ${message}`)
+  }
 }
