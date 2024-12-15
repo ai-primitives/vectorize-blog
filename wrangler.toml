@@ -1,0 +1,23 @@
+name = "vectorize-blog"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[ai]
+binding = "AI"
+
+# Configure AI models
+[[ai.models]]
+name = "bge-small-en-v1.5"
+type = "embeddings"
+
+[[ai.models]]
+name = "@cf/llama-3.3-70b-instruct-fp8-fast"
+type = "llm"
+
+[[vectorize]]
+binding = "BLOG_INDEX"
+index_name = "blog-index"
+
+# Test environment configuration
+[env.test]
+compatibility_flags = ["nodejs_compat"]
