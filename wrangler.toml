@@ -13,5 +13,6 @@ type = "embeddings"
 name = "@cf/llama-3.3-70b-instruct-fp8-fast"
 type = "llm"
 
-[vectorize]
+[[vectorize]]
 binding = "BLOG_INDEX"
+index_name = "blog-index"
