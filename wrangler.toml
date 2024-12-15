@@ -17,3 +17,7 @@ type = "llm"
 [[vectorize]]
 binding = "BLOG_INDEX"
 index_name = "blog-index"
+
+# Test environment configuration
+[env.test]
+# Test environment uses mocked bindings from test files
