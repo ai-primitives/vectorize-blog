@@ -2,7 +2,7 @@
   "name": "vectorize-blog",
   "version": "1.0.0",
   "description": "AI-Powered Blog with Cloudflare Workers, AI Workers, Vectorize, Hono, and Tailwind CSS",
-  "main": "src/index.ts",
+  "main": "src/index.tsx",
   "type": "module",
   "scripts": {
     "test": "vitest run",
@@ -30,6 +30,7 @@
     "@types/node": "^20.10.5",
     "semantic-release": "^24.2.0",
     "typescript": "^5.7.2",
+    "vite": "^6.0.3",
     "vitest": "^2.1.8",
     "vitest-environment-miniflare": "^2.14.4",
     "wrangler": "^3.95.0"
