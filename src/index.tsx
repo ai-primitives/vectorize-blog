@@ -6,12 +6,14 @@ import { storeBlogPost, findRelatedPosts, generateEmbedding } from './utils/vect
 import type { BlogPostInput, BlogPostMeta } from './types/blog'
 import { RootLayout } from './layouts/RootLayout'
 import { Loading } from './components/Loading'
+import { BlogGrid } from './components/BlogGrid'
+import { BlogGridSkeleton } from './components/BlogGridSkeleton'
 import robotsRoute from './routes/robots'
 
 const app = new Hono<{ Bindings: Env }>()
 
 // Mount routes
-app.route('/', robotsRoute)
+app.route('/robots.txt', robotsRoute)
 
 // Health check endpoint
 app.get('/health', (c) => c.text('OK'))
@@ -93,7 +95,7 @@ app.get('/blog/:title', async (c) => {
   const title = decodeURIComponent(c.req.param('title').replace(/_/g, ' '))
   const stream = renderToReadableStream(
     <RootLayout>
-      <Suspense fallback={<Loading />}>
+      <Suspense fallback={<Loading className="py-12" />}>
         <BlogPost title={title} env={c.env} />
       </Suspense>
     </RootLayout>
@@ -106,34 +108,11 @@ app.get('/blog/:title', async (c) => {
   })
 })
 
-// Blog post grid component
-const BlogGrid = async ({ env }: { env: Env }) => {
-  const titleEmbedding = await generateEmbedding(env, '')
-  const posts = await findRelatedPosts(env, titleEmbedding, 12)
-
-  return html`
-    <div class="container mx-auto px-4 py-8">
-      <h1 class="text-4xl font-bold mb-8">Latest Blog Posts</h1>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        ${posts.map(post => html`
-          <a href="${post.url}" class="block p-6 bg-white rounded-lg border hover:shadow-lg transition-shadow">
-            <h2 class="text-xl font-semibold mb-2">${post.title}</h2>
-            <p class="text-gray-600 mb-4">${post.description}</p>
-            <div class="text-sm text-gray-500">
-              <span class="font-medium">${post.tagline}</span>
-            </div>
-          </a>
-        `).join('')}
-      </div>
-    </div>
-  `
-}
-
 // Root endpoint
 app.get('/', (c) => {
   const stream = renderToReadableStream(
     <RootLayout>
-      <Suspense fallback={<Loading />}>
+      <Suspense fallback={<BlogGridSkeleton />}>
         <BlogGrid env={c.env} />
       </Suspense>
     </RootLayout>

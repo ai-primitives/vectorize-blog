@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "dev": "wrangler dev src/index.tsx --ip 0.0.0.0 --experimental-vectorize-bind-to-prod",
+    "dev": "wrangler dev src/index.tsx --port 8787 --ip 0.0.0.0 --experimental-vectorize-bind-to-prod --local",
     "deploy": "wrangler deploy",
     "build": "wrangler deploy --dry-run --outdir=dist"
   },
